@@ -1,0 +1,120 @@
+defmodule StoreAdmin.Inventories do
+  @moduledoc """
+  The Inventories context.
+  """
+
+  import Ecto.Query, warn: false
+  alias StoreAdmin.Repo
+
+  alias StoreAdmin.Inventories.Store
+
+  @doc """
+  Returns the list of stores.
+
+  ## Examples
+
+      iex> list_stores()
+      [%Store{}, ...]
+
+  """
+  def list_stores do
+    from(s in Store, where: is_nil(s.deleted_at))
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single store.
+
+  Raises `Ecto.NoResultsError` if the Store does not exist.
+
+  ## Examples
+
+      iex> get_store!(123)
+      %Store{}
+
+      iex> get_store!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_store(id) do
+    case find_store(id) do
+      %Store{} = store -> {:ok, store}
+      nil -> {:error, "Store not found"}
+    end
+  end
+
+  defp find_store(id) do
+    from(
+      s in Store,
+      where: is_nil(s.deleted_at)
+    )
+    |> Repo.get(id)
+  end
+
+  @doc """
+  Creates a store.
+
+  ## Examples
+
+      iex> create_store(%{field: value})
+      {:ok, %Store{}}
+
+      iex> create_store(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_store(attrs \\ %{}) do
+    %Store{}
+    |> Store.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a store.
+
+  ## Examples
+
+      iex> update_store(store, %{field: new_value})
+      {:ok, %Store{}}
+
+      iex> update_store(store, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_store(%Store{} = store, attrs) do
+    store
+    |> Store.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Store. Performs soft-delete
+
+  ## Examples
+
+      iex> delete_store(store)
+      {:ok, %Store{}}
+
+      iex> delete_store(store)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_store(%Store{} = store) do
+    store
+    |> Store.delete_changeset()
+    |> Repo.update()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking store changes.
+
+  ## Examples
+
+      iex> change_store(store)
+      %Ecto.Changeset{source: %Store{}}
+
+  """
+  def change_store(%Store{} = store) do
+    Store.changeset(store, %{})
+  end
+end
