@@ -9,6 +9,10 @@ defmodule StoreAdminWeb.ErrorView do
     %{errors: %{detail: "Resource not found"}}
   end
 
+  def render("400.json", %{msg: msg}) do
+    %{errors: %{detail: msg}}
+  end
+
   # By default, Phoenix returns the status message from
   # the template name. For example, "404.json" becomes
   # "Not Found".

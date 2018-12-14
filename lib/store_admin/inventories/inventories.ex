@@ -155,6 +155,11 @@ defmodule StoreAdmin.Inventories do
     end
   end
 
+  defp find_products(store_id, [_ | _] = product_ids) do
+    from(p in Product, where: p.store_id == ^store_id and p.id in ^product_ids)
+    |> Repo.all()
+  end
+
   defp find_product(store_id, product_id) do
     from(p in Product, where: p.store_id == ^store_id)
     |> Repo.get(product_id)
@@ -223,5 +228,140 @@ defmodule StoreAdmin.Inventories do
   """
   def change_product(%Product{} = product) do
     Product.changeset(product, %{})
+  end
+
+  alias StoreAdmin.Inventories.Sale
+
+  @doc """
+  Returns the list of sales.
+
+  ## Examples
+
+      iex> list_sales()
+      [%Sale{}, ...]
+
+  """
+  def list_sales do
+    Repo.all(Sale)
+  end
+
+  @doc """
+  Gets a single sale.
+
+  Raises `Ecto.NoResultsError` if the Sale does not exist.
+
+  ## Examples
+
+      iex> get_sale!(123)
+      %Sale{}
+
+      iex> get_sale!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_sale(store_id, sale_id) do
+    case find_sale(store_id, sale_id) do
+      %Sale{} = sale -> {:ok, sale}
+      nil -> {:error, "sale not found"}
+    end
+  end
+
+  defp find_sale(store_id, sale_id) do
+    from(s in Sale, where: s.store_id == ^store_id)
+    |> Repo.get(sale_id)
+  end
+
+  @doc """
+  Creates a sale.
+
+  ## Examples
+
+      iex> create_sale(%{field: value})
+      {:ok, %Sale{}}
+
+      iex> create_sale(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_sale(%{"sale_items" => sale_items} = attrs) do
+    attrs =
+      attrs
+      |> Map.put("total_value", calculate_sale_total_value(sale_items))
+
+    %Sale{}
+    |> Sale.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp calculate_sale_total_value([_ | _] = sale_items) do
+    sale_items
+    |> Enum.reduce(0, fn %{"quantity" => quantity, "unit_price" => unit_price}, acc ->
+      quantity * unit_price + acc
+    end)
+  end
+
+  defp calculate_sale_total_value([] = _sale_items) do
+    0.0
+  end
+
+  def validate_sale_products(%{"store_id" => store_id, "sale_items" => sale_items = [_ | _]}) do
+    product_ids =
+      sale_items
+      |> Enum.reduce([], fn %{"product_id" => product_id}, acc ->
+        acc ++ [product_id]
+      end)
+
+    find_products(store_id, product_ids)
+  end
+
+  def validate_sale_products(%{"store_id" => _, "sale_items" => _ = []}) do
+    []
+  end
+
+  @doc """
+  Updates a sale.
+
+  ## Examples
+
+      iex> update_sale(sale, %{field: new_value})
+      {:ok, %Sale{}}
+
+      iex> update_sale(sale, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_sale(%Sale{} = sale, attrs) do
+    sale
+    |> Sale.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Sale.
+
+  ## Examples
+
+      iex> delete_sale(sale)
+      {:ok, %Sale{}}
+
+      iex> delete_sale(sale)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_sale(%Sale{} = sale) do
+    Repo.delete(sale)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking sale changes.
+
+  ## Examples
+
+      iex> change_sale(sale)
+      %Ecto.Changeset{source: %Sale{}}
+
+  """
+  def change_sale(%Sale{} = sale) do
+    Sale.changeset(sale, %{})
   end
 end

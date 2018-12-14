@@ -10,6 +10,7 @@ defmodule StoreAdmin.Inventories.Store do
     field(:phone, :string)
 
     has_many(:products, StoreAdmin.Inventories.Product)
+    has_many(:sales, StoreAdmin.Inventories.Sale)
 
     timestamps(type: :utc_datetime)
   end

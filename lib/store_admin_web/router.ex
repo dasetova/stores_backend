@@ -10,6 +10,7 @@ defmodule StoreAdminWeb.Router do
 
     resources("/stores", StoreController, except: [:new, :edit]) do
       resources("/products", ProductController, except: [:new, :edit])
+      resources("/sales", SaleController, except: [:new, :edit])
     end
   end
 end
