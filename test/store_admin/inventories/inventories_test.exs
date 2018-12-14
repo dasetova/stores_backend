@@ -79,4 +79,88 @@ defmodule StoreAdmin.InventoriesTest do
       assert %Ecto.Changeset{} = Inventories.change_store(store)
     end
   end
+
+  describe "products" do
+    alias StoreAdmin.Inventories.Product
+
+    @valid_attrs %{
+      available_quantity: 42,
+      description: "some description",
+      name: "some name",
+      unit_price: 120.5
+    }
+    @update_attrs %{
+      available_quantity: 43,
+      description: "some updated description",
+      name: "some updated name",
+      unit_price: 456.7
+    }
+    @invalid_attrs %{available_quantity: nil, description: nil, name: nil, unit_price: nil}
+
+    def product_fixture(attrs \\ %{}) do
+      store = store_fixture()
+
+      {:ok, product} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Map.put(:store_id, store.id)
+        |> Inventories.create_product()
+
+      product
+    end
+
+    test "list_products/1 returns all products of the given store_id" do
+      product = product_fixture()
+      assert Inventories.list_products(product.store_id) == [product]
+    end
+
+    test "get_product/2 returns the product with given store_id and product_id" do
+      product = product_fixture()
+      assert Inventories.get_product(product.store_id, product.id) == {:ok, product}
+    end
+
+    test "create_product/1 with valid data creates a product" do
+      store = store_fixture()
+
+      assert {:ok, %Product{} = product} =
+               @valid_attrs
+               |> Map.put(:store_id, store.id)
+               |> Inventories.create_product()
+
+      assert product.available_quantity == 42
+      assert product.description == "some description"
+      assert product.name == "some name"
+      assert product.unit_price == 120.5
+    end
+
+    test "create_product/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Inventories.create_product(@invalid_attrs)
+    end
+
+    test "update_product/2 with valid data updates the product" do
+      product = product_fixture()
+      assert {:ok, product} = Inventories.update_product(product, @update_attrs)
+      assert %Product{} = product
+      assert product.available_quantity == 43
+      assert product.description == "some updated description"
+      assert product.name == "some updated name"
+      assert product.unit_price == 456.7
+    end
+
+    test "update_product/2 with invalid data returns error changeset" do
+      product = product_fixture()
+      assert {:error, %Ecto.Changeset{}} = Inventories.update_product(product, @invalid_attrs)
+      assert {:ok, product} == Inventories.get_product(product.store_id, product.id)
+    end
+
+    test "delete_product/1 deletes the product" do
+      product = product_fixture()
+      assert {:ok, %Product{}} = Inventories.delete_product(product)
+    end
+
+    test "change_product/1 returns a product changeset" do
+      product = product_fixture()
+      assert %Ecto.Changeset{} = Inventories.change_product(product)
+    end
+  end
 end
