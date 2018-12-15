@@ -65,12 +65,4 @@ defmodule StoreAdminWeb.SaleController do
       render(conn, "show.json", sale: sale)
     end
   end
-
-  def delete(conn, %{"store_id" => store_id, "id" => id}) do
-    with {:ok, %Sale{} = sale} <- Inventories.get_sale(store_id, id) do
-      with {:ok, %Sale{}} <- Inventories.delete_sale(sale) do
-        send_resp(conn, :no_content, "")
-      end
-    end
-  end
 end
