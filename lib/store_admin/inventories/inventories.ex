@@ -5,6 +5,7 @@ defmodule StoreAdmin.Inventories do
 
   import Ecto.Query, warn: false
   alias StoreAdmin.Repo
+  alias Ecto.Multi
 
   alias StoreAdmin.Inventories.Store
 
@@ -284,13 +285,42 @@ defmodule StoreAdmin.Inventories do
 
   """
   def create_sale(%{"sale_items" => sale_items} = attrs) do
+    Multi.new()
+    |> Multi.insert(:sale, prepare_sale_to_insert(sale_items, attrs))
+    |> update_products_inventories(attrs)
+    |> Repo.transaction()
+  end
+
+  defp update_products_inventories(
+         multi,
+         %{"sale_items" => sale_items, "store_id" => store_id}
+       ) do
+    IO.puts("Ingreso1!")
+    IO.inspect(sale_items, label: "Ingreso2!")
+
+    Enum.reduce(sale_items, multi, fn item, acc ->
+      IO.puts("Ingreso3!")
+      product_id = Map.get(item, "product_id")
+      quantity = Map.get(item, "quantity")
+
+      {:ok, product} = get_product(store_id, product_id)
+
+      product_update_changeset =
+        Product.changeset(product, %{
+          available_quantity: product.available_quantity - quantity
+        })
+
+      acc
+      |> Multi.update(String.to_atom("update_product_#{product_id}"), product_update_changeset)
+    end)
+  end
+
+  defp prepare_sale_to_insert(sale_items, attrs) do
     attrs =
       attrs
       |> Map.put("total_value", calculate_sale_total_value(sale_items))
 
-    %Sale{}
-    |> Sale.changeset(attrs)
-    |> Repo.insert()
+    Sale.changeset(%Sale{}, attrs)
   end
 
   defp calculate_sale_total_value([_ | _] = sale_items) do
@@ -316,6 +346,27 @@ defmodule StoreAdmin.Inventories do
 
   def validate_sale_products(%{"store_id" => _, "sale_items" => _ = []}) do
     []
+  end
+
+  def validate_products_inventory(products, sale_items) do
+    Enum.reduce(sale_items, [], fn item, errors ->
+      case Enum.find(products, fn product ->
+             product.id == Map.get(item, "product_id")
+           end) do
+        nil ->
+          errors ++ ["#{item.product_id} wasnt found in the given products list"]
+
+        product ->
+          case product.available_quantity >= Map.get(item, "quantity") do
+            true ->
+              errors
+
+            false ->
+              errors ++
+                ["Product with ID: #{product.id} has #{product.available_quantity} in inventory"]
+          end
+      end
+    end)
   end
 
   @doc """

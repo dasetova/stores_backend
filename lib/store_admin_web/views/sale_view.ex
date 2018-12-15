@@ -11,8 +11,10 @@ defmodule StoreAdminWeb.SaleView do
   end
 
   def render("sale.json", %{sale: sale}) do
-    %{id: sale.id,
+    %{
+      id: sale.id,
       customer_identification_number: sale.customer_identification_number,
-      total_value: sale.total_value}
+      total_value: sale.total_value
+    }
   end
 end

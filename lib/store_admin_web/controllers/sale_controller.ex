@@ -31,12 +31,18 @@ defmodule StoreAdminWeb.SaleController do
         conn
         |> send_bad_params("One or more products doesn't belongs to store")
 
-      _ ->
-        with {:ok, %Sale{} = sale} <- Inventories.create_sale(sale_params) do
-          conn
-          |> put_status(:created)
-          |> put_resp_header("location", store_sale_path(conn, :show, sale.store_id, sale))
-          |> render("show.json", sale: sale)
+      products ->
+        case Inventories.validate_products_inventory(products, sale_items) do
+          [] ->
+            with {:ok, %{sale: %Sale{} = sale}} <- Inventories.create_sale(sale_params) do
+              conn
+              |> put_status(:created)
+              |> put_resp_header("location", store_sale_path(conn, :show, sale.store_id, sale))
+              |> render("show.json", sale: sale)
+            end
+
+          errors ->
+            conn |> send_bad_params(errors)
         end
     end
   end
