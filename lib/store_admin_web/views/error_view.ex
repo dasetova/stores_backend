@@ -5,8 +5,8 @@ defmodule StoreAdminWeb.ErrorView do
     %{errors: %{detail: "Internal Server Error"}}
   end
 
-  def render("404.json", _assigns) do
-    %{errors: %{detail: "Resource not found"}}
+  def render("404.json", %{msg: msg}) do
+    %{errors: %{detail: msg}}
   end
 
   def render("400.json", %{msg: msg}) do

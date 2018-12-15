@@ -265,7 +265,7 @@ defmodule StoreAdmin.Inventories do
   def get_sale(store_id, sale_id) do
     case find_sale(store_id, sale_id) do
       %Sale{} = sale -> {:ok, sale}
-      nil -> {:error, "sale not found"}
+      nil -> {:error, "Sale not found"}
     end
   end
 
@@ -290,13 +290,18 @@ defmodule StoreAdmin.Inventories do
   def create_sale(%{"sale_items" => sale_items} = attrs) do
     Multi.new()
     |> Multi.insert(:sale, prepare_sale_to_insert(sale_items, attrs))
-    |> update_products_inventories(attrs)
+    |> update_products_inventories(attrs, -1)
     |> Repo.transaction()
   end
 
+  """
+  event param is used to add or remove quantity
+  """
+
   defp update_products_inventories(
          multi,
-         %{"sale_items" => sale_items, "store_id" => store_id}
+         %{"sale_items" => sale_items, "store_id" => store_id},
+         event
        ) do
     Enum.reduce(sale_items, multi, fn item, acc ->
       product_id = Map.get(item, "product_id")
@@ -306,7 +311,7 @@ defmodule StoreAdmin.Inventories do
 
       product_update_changeset =
         Product.changeset(product, %{
-          available_quantity: product.available_quantity - quantity
+          available_quantity: product.available_quantity + quantity * event
         })
 
       acc
@@ -419,6 +424,26 @@ defmodule StoreAdmin.Inventories do
 
   alias StoreAdmin.Inventories.SaleItem
 
+  defp change_item_from_sale(multi, store_id, sale, sale_item_params, event) do
+    multi
+    |> Multi.update(
+      :sale_updated,
+      Sale.changeset(sale, %{
+        total_value:
+          sale.total_value +
+            Map.get(sale_item_params, "unit_price") * Map.get(sale_item_params, "quantity") *
+              event
+      })
+    )
+    |> update_products_inventories(
+      %{
+        "sale_items" => [sale_item_params],
+        "store_id" => store_id
+      },
+      event * -1
+    )
+  end
+
   def add_item_to_sale(store_id, sale_id, sale_item_params) do
     case get_sale(store_id, sale_id) do
       {:ok, sale} ->
@@ -427,22 +452,53 @@ defmodule StoreAdmin.Inventories do
           :sale_item,
           SaleItem.changeset(%SaleItem{}, sale_item_params |> Map.put("sale_id", sale_id))
         )
-        |> Multi.update(
-          :sale_updated,
-          Sale.changeset(sale, %{
-            total_value:
-              sale.total_value +
-                Map.get(sale_item_params, "unit_price") * Map.get(sale_item_params, "quantity")
-          })
-        )
-        |> update_products_inventories(%{
-          "sale_items" => [sale_item_params],
-          "store_id" => store_id
-        })
+        |> change_item_from_sale(store_id, sale, sale_item_params, 1)
         |> Repo.transaction()
 
-      _ ->
-        {:error, "Sale not found"}
+      error ->
+        error
+    end
+  end
+
+  def remove_item_from_sale(store_id, sale_id, sale_item_id) do
+    case get_sale(store_id, sale_id) do
+      {:ok, sale} ->
+        case get_sale_item(sale_id, sale_item_id) do
+          {:ok, sale_item} ->
+            sale_item_params = convert_to_map(sale_item)
+
+            Multi.new()
+            |> change_item_from_sale(store_id, sale, sale_item_params, -1)
+            |> Multi.delete(
+              :sale_item_deleted,
+              sale_item
+            )
+            |> Repo.transaction()
+
+          error ->
+            error
+        end
+
+      error ->
+        error
+    end
+  end
+
+  defp convert_to_map(param) do
+    param
+    |> Map.from_struct()
+    |> change_atom_map_to_string()
+  end
+
+  defp change_atom_map_to_string(atom_key_map) do
+    for {key, val} <- atom_key_map, into: %{}, do: {Atom.to_string(key), val}
+  end
+
+  def get_sale_item(sale_id, sale_item_id) do
+    case from(si in SaleItem, where: si.sale_id == ^sale_id)
+         |> Repo.get(sale_item_id) do
+      nil -> {:error, "SaleItem not found"}
+      %SaleItem{} = sale_item -> {:ok, sale_item}
     end
   end
 end

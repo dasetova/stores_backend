@@ -35,6 +35,17 @@ defmodule StoreAdminWeb.SaleItemController do
     end
   end
 
+  def remove_item_from_sale(conn, %{
+        "store_id" => store_id,
+        "sale_id" => sale_id,
+        "sale_item_id" => sale_item_id
+      }) do
+    with {:ok, %{sale_item_deleted: %SaleItem{}}} <-
+           Inventories.remove_item_from_sale(store_id, sale_id, sale_item_id) do
+      send_resp(conn, :no_content, "")
+    end
+  end
+
   defp send_bad_params(conn, msg) do
     conn
     |> put_status(:bad_request)

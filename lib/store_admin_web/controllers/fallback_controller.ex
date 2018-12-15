@@ -6,7 +6,12 @@ defmodule StoreAdminWeb.FallbackController do
   """
   use StoreAdminWeb, :controller
 
-  @not_found_errors ["Store not found", "Product not found"]
+  @not_found_errors [
+    "Store not found",
+    "Product not found",
+    "Sale not found",
+    "SaleItem not found"
+  ]
 
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
@@ -17,7 +22,7 @@ defmodule StoreAdminWeb.FallbackController do
   def call(conn, {:error, msg}) when msg in @not_found_errors do
     conn
     |> put_status(:not_found)
-    |> render(StoreAdminWeb.ErrorView, "404.json")
+    |> render(StoreAdminWeb.ErrorView, "404.json", msg: msg)
   end
 
   def call(conn, {:error, :not_found}) do

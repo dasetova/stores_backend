@@ -13,6 +13,7 @@ defmodule StoreAdminWeb.Router do
 
       resources("/sales", SaleController, except: [:new, :edit]) do
         post("/sale_items", SaleItemController, :add_item_to_sale)
+        delete("/sale_items/:sale_item_id", SaleItemController, :remove_item_from_sale)
       end
     end
   end
