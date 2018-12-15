@@ -1,6 +1,6 @@
 defmodule StoreAdminWeb.SaleView do
   use StoreAdminWeb, :view
-  alias StoreAdminWeb.SaleView
+  alias StoreAdminWeb.{SaleView, SaleItemView}
 
   def render("index.json", %{sales: sales}) do
     %{data: render_many(sales, SaleView, "sale.json")}
@@ -14,7 +14,8 @@ defmodule StoreAdminWeb.SaleView do
     %{
       id: sale.id,
       customer_identification_number: sale.customer_identification_number,
-      total_value: sale.total_value
+      total_value: sale.total_value,
+      sale_items: render_many(sale.sale_items, SaleItemView, "sale_item.json")
     }
   end
 end

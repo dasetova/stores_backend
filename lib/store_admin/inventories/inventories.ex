@@ -242,8 +242,10 @@ defmodule StoreAdmin.Inventories do
       [%Sale{}, ...]
 
   """
-  def list_sales do
-    Repo.all(Sale)
+  def list_sales(store_id) do
+    from(s in Sale, where: s.store_id == ^store_id)
+    |> Repo.all()
+    |> Repo.preload(:sale_items)
   end
 
   @doc """
@@ -270,6 +272,7 @@ defmodule StoreAdmin.Inventories do
   defp find_sale(store_id, sale_id) do
     from(s in Sale, where: s.store_id == ^store_id)
     |> Repo.get(sale_id)
+    |> Repo.preload(:sale_items)
   end
 
   @doc """
@@ -295,11 +298,7 @@ defmodule StoreAdmin.Inventories do
          multi,
          %{"sale_items" => sale_items, "store_id" => store_id}
        ) do
-    IO.puts("Ingreso1!")
-    IO.inspect(sale_items, label: "Ingreso2!")
-
     Enum.reduce(sale_items, multi, fn item, acc ->
-      IO.puts("Ingreso3!")
       product_id = Map.get(item, "product_id")
       quantity = Map.get(item, "quantity")
 
@@ -324,6 +323,8 @@ defmodule StoreAdmin.Inventories do
   end
 
   defp calculate_sale_total_value([_ | _] = sale_items) do
+    IO.inspect(sale_items, label: "AAAH")
+
     sale_items
     |> Enum.reduce(0, fn %{"quantity" => quantity, "unit_price" => unit_price}, acc ->
       quantity * unit_price + acc

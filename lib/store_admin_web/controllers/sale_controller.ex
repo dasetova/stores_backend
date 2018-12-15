@@ -6,8 +6,8 @@ defmodule StoreAdminWeb.SaleController do
 
   action_fallback(StoreAdminWeb.FallbackController)
 
-  def index(conn, _params) do
-    sales = Inventories.list_sales()
+  def index(conn, %{"store_id" => store_id}) do
+    sales = Inventories.list_sales(store_id)
     render(conn, "index.json", sales: sales)
   end
 
