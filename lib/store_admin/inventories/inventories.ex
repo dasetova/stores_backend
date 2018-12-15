@@ -416,4 +416,33 @@ defmodule StoreAdmin.Inventories do
   def change_sale(%Sale{} = sale) do
     Sale.changeset(sale, %{})
   end
+
+  alias StoreAdmin.Inventories.SaleItem
+
+  def add_item_to_sale(store_id, sale_id, sale_item_params) do
+    case get_sale(store_id, sale_id) do
+      {:ok, sale} ->
+        Multi.new()
+        |> Multi.insert(
+          :sale_item,
+          SaleItem.changeset(%SaleItem{}, sale_item_params |> Map.put("sale_id", sale_id))
+        )
+        |> Multi.update(
+          :sale_updated,
+          Sale.changeset(sale, %{
+            total_value:
+              sale.total_value +
+                Map.get(sale_item_params, "unit_price") * Map.get(sale_item_params, "quantity")
+          })
+        )
+        |> update_products_inventories(%{
+          "sale_items" => [sale_item_params],
+          "store_id" => store_id
+        })
+        |> Repo.transaction()
+
+      _ ->
+        {:error, "Sale not found"}
+    end
+  end
 end
