@@ -3,7 +3,7 @@ defmodule StoreAdminWeb.SaleItemView do
   alias StoreAdminWeb.SaleItemView
 
   def render("show.json", %{sale_item: sale_item}) do
-    %{data: render_one(sale_item, SaleItemView, "sale_item.json")}
+    render_one(sale_item, SaleItemView, "sale_item.json")
   end
 
   def render("sale_item.json", %{sale_item: sale_item}) do

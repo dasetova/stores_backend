@@ -30,18 +30,18 @@ defmodule StoreAdminWeb.StoreControllerTest do
   describe "index" do
     test "lists all stores", %{conn: conn} do
       conn = get(conn, store_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+      assert json_response(conn, 200)
     end
   end
 
   describe "create store" do
     test "renders store when data is valid", %{conn: conn} do
       conn = post(conn, store_path(conn, :create), store: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      assert %{"id" => id} = json_response(conn, 201)
 
       conn = get(conn, store_path(conn, :show, id))
 
-      assert json_response(conn, 200)["data"] == %{
+      assert json_response(conn, 200) == %{
                "id" => id,
                "address" => "some address",
                "deleted_at" => nil,
@@ -62,11 +62,11 @@ defmodule StoreAdminWeb.StoreControllerTest do
 
     test "renders store when data is valid", %{conn: conn, store: %Store{id: id} = store} do
       conn = put(conn, store_path(conn, :update, store), store: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+      assert %{"id" => ^id} = json_response(conn, 200)
 
       conn = get(conn, store_path(conn, :show, id))
 
-      assert json_response(conn, 200)["data"] == %{
+      assert json_response(conn, 200) == %{
                "id" => id,
                "address" => "some updated address",
                "deleted_at" => nil,

@@ -19,8 +19,6 @@ defmodule StoreAdmin.Inventories.SaleItem do
   Builds a changeset based on the `struct` and `params`.
   """
   def changeset(struct, params \\ %{}) do
-    IO.inspect(params, label: "Changeset")
-
     struct
     |> cast(params, @attrs)
     |> validate_required(@require_attrs)

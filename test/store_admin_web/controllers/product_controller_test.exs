@@ -36,7 +36,7 @@ defmodule StoreAdminWeb.ProductControllerTest do
   describe "index" do
     test "lists all products", %{conn: conn} do
       conn = get(conn, store_product_path(conn, :index, 100))
-      assert json_response(conn, 200)["data"] == []
+      assert json_response(conn, 200) == []
     end
   end
 
@@ -47,11 +47,11 @@ defmodule StoreAdminWeb.ProductControllerTest do
       conn =
         post(conn, store_product_path(conn, :create, product.store_id), product: @create_attrs)
 
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      assert %{"id" => id} = json_response(conn, 201)
 
       conn = get(conn, store_product_path(conn, :show, product.store_id, id))
 
-      assert json_response(conn, 200)["data"] == %{
+      assert json_response(conn, 200) == %{
                "id" => id,
                "available_quantity" => 42,
                "description" => "some description",
@@ -79,11 +79,11 @@ defmodule StoreAdminWeb.ProductControllerTest do
           product: @update_attrs
         )
 
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+      assert %{"id" => ^id} = json_response(conn, 200)
 
       conn = get(conn, store_product_path(conn, :show, product.store_id, id))
 
-      assert json_response(conn, 200)["data"] == %{
+      assert json_response(conn, 200) == %{
                "id" => id,
                "available_quantity" => 43,
                "description" => "some updated description",

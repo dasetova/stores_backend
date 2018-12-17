@@ -294,10 +294,6 @@ defmodule StoreAdmin.Inventories do
     |> Repo.transaction()
   end
 
-  """
-  event param is used to add or remove quantity
-  """
-
   defp update_products_inventories(
          multi,
          %{"sale_items" => sale_items, "store_id" => store_id},
@@ -328,8 +324,6 @@ defmodule StoreAdmin.Inventories do
   end
 
   defp calculate_sale_total_value([_ | _] = sale_items) do
-    IO.inspect(sale_items, label: "AAAH")
-
     sale_items
     |> Enum.reduce(0, fn %{"quantity" => quantity, "unit_price" => unit_price}, acc ->
       quantity * unit_price + acc
@@ -373,40 +367,6 @@ defmodule StoreAdmin.Inventories do
           end
       end
     end)
-  end
-
-  @doc """
-  Updates a sale.
-
-  ## Examples
-
-      iex> update_sale(sale, %{field: new_value})
-      {:ok, %Sale{}}
-
-      iex> update_sale(sale, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_sale(%Sale{} = sale, attrs) do
-    sale
-    |> Sale.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a Sale.
-
-  ## Examples
-
-      iex> delete_sale(sale)
-      {:ok, %Sale{}}
-
-      iex> delete_sale(sale)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_sale(%Sale{} = sale) do
-    Repo.delete(sale)
   end
 
   @doc """
