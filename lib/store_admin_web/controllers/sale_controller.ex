@@ -38,7 +38,7 @@ defmodule StoreAdminWeb.SaleController do
               conn
               |> put_status(:created)
               |> put_resp_header("location", store_sale_path(conn, :show, sale.store_id, sale))
-              |> render("show.json", sale: sale)
+              |> render("creation.json", sale: sale)
             end
 
           errors ->

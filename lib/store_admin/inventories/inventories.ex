@@ -246,6 +246,7 @@ defmodule StoreAdmin.Inventories do
     from(s in Sale, where: s.store_id == ^store_id)
     |> Repo.all()
     |> Repo.preload(:sale_items)
+    |> Repo.preload(sale_items: :product)
   end
 
   @doc """
@@ -273,6 +274,7 @@ defmodule StoreAdmin.Inventories do
     from(s in Sale, where: s.store_id == ^store_id)
     |> Repo.get(sale_id)
     |> Repo.preload(:sale_items)
+    |> Repo.preload(sale_items: :product)
   end
 
   @doc """

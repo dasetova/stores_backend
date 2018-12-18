@@ -18,4 +18,13 @@ defmodule StoreAdminWeb.SaleView do
       sale_items: render_many(sale.sale_items, SaleItemView, "sale_item.json")
     }
   end
+
+  def render("creation.json", %{sale: sale}) do
+    %{
+      id: sale.id,
+      customer_identification_number: sale.customer_identification_number,
+      total_value: sale.total_value,
+      sale_items: render_many(sale.sale_items, SaleItemView, "creation.json")
+    }
+  end
 end

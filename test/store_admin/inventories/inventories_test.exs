@@ -165,17 +165,10 @@ defmodule StoreAdmin.InventoriesTest do
   end
 
   describe "sales" do
-    alias StoreAdmin.Inventories.Sale
-
     @valid_attrs %{
       customer_identification_number: "some customer_identification_number",
       total_value: 120.5
     }
-    @update_attrs %{
-      customer_identification_number: "some updated customer_identification_number",
-      total_value: 456.7
-    }
-    @invalid_attrs %{customer_identification_number: nil, total_value: nil}
 
     def sale_fixture() do
       {:ok, %{sale: sale}} =
@@ -196,22 +189,6 @@ defmodule StoreAdmin.InventoriesTest do
 
     defp change_atom_map_to_string(atom_key_map) do
       for {key, val} <- atom_key_map, into: %{}, do: {Atom.to_string(key), val}
-    end
-
-    test "list_sales/0 returns all sales" do
-      sale = sale_fixture()
-      assert Inventories.list_sales(sale.store_id) == [sale]
-    end
-
-    test "get_sale/1 returns the sale with given id" do
-      sale = sale_fixture()
-      assert Inventories.get_sale(sale.store_id, sale.id) == {:ok, sale}
-    end
-
-    test "create_sale/1 with valid data creates a sale" do
-      assert {:ok, %Sale{} = sale} = Inventories.create_sale(prepare_sale())
-      assert sale.customer_identification_number == "some customer_identification_number"
-      assert sale.total_value == 120.5
     end
 
     test "change_sale/1 returns a sale changeset" do
