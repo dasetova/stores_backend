@@ -163,4 +163,52 @@ defmodule StoreAdmin.InventoriesTest do
       assert %Ecto.Changeset{} = Inventories.change_product(product)
     end
   end
+
+  describe "sales" do
+    @valid_attrs %{
+      customer_identification_number: "some customer_identification_number",
+      total_value: 120.5
+    }
+
+    def sale_fixture() do
+      {:ok, %{sale: sale}} =
+        prepare_sale()
+        |> Inventories.create_sale()
+
+      sale
+    end
+
+    defp prepare_sale() do
+      %{product: product, sale_item: sale_item} = sale_item_fixture()
+
+      @valid_attrs
+      |> Map.put(:store_id, product.store_id)
+      |> change_atom_map_to_string()
+      |> Map.put("sale_items", [change_atom_map_to_string(sale_item)])
+    end
+
+    defp change_atom_map_to_string(atom_key_map) do
+      for {key, val} <- atom_key_map, into: %{}, do: {Atom.to_string(key), val}
+    end
+
+    test "change_sale/1 returns a sale changeset" do
+      sale = sale_fixture()
+      assert %Ecto.Changeset{} = Inventories.change_sale(sale)
+    end
+  end
+
+  @valid_attrs %{
+    quantity: 1,
+    unit_price: 12000.0
+  }
+  def sale_item_fixture(attrs \\ %{}) do
+    product = product_fixture()
+
+    sale_item =
+      attrs
+      |> Enum.into(@valid_attrs)
+      |> Map.put(:product_id, product.id)
+
+    %{product: product, sale_item: sale_item}
+  end
 end

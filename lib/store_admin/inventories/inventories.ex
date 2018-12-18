@@ -5,6 +5,7 @@ defmodule StoreAdmin.Inventories do
 
   import Ecto.Query, warn: false
   alias StoreAdmin.Repo
+  alias Ecto.Multi
 
   alias StoreAdmin.Inventories.Store
 
@@ -155,6 +156,11 @@ defmodule StoreAdmin.Inventories do
     end
   end
 
+  defp find_products(store_id, [_ | _] = product_ids) do
+    from(p in Product, where: p.store_id == ^store_id and p.id in ^product_ids)
+    |> Repo.all()
+  end
+
   defp find_product(store_id, product_id) do
     from(p in Product, where: p.store_id == ^store_id)
     |> Repo.get(product_id)
@@ -223,5 +229,238 @@ defmodule StoreAdmin.Inventories do
   """
   def change_product(%Product{} = product) do
     Product.changeset(product, %{})
+  end
+
+  alias StoreAdmin.Inventories.Sale
+
+  @doc """
+  Returns the list of sales.
+
+  ## Examples
+
+      iex> list_sales()
+      [%Sale{}, ...]
+
+  """
+  def list_sales(store_id) do
+    from(s in Sale, where: s.store_id == ^store_id)
+    |> Repo.all()
+    |> Repo.preload(:sale_items)
+    |> Repo.preload(sale_items: :product)
+  end
+
+  @doc """
+  Gets a single sale.
+
+  Raises `Ecto.NoResultsError` if the Sale does not exist.
+
+  ## Examples
+
+      iex> get_sale!(123)
+      %Sale{}
+
+      iex> get_sale!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_sale(store_id, sale_id) do
+    case find_sale(store_id, sale_id) do
+      %Sale{} = sale -> {:ok, sale}
+      nil -> {:error, "Sale not found"}
+    end
+  end
+
+  defp find_sale(store_id, sale_id) do
+    from(s in Sale, where: s.store_id == ^store_id)
+    |> Repo.get(sale_id)
+    |> Repo.preload(:sale_items)
+    |> Repo.preload(sale_items: :product)
+  end
+
+  @doc """
+  Creates a sale.
+
+  ## Examples
+
+      iex> create_sale(%{field: value})
+      {:ok, %Sale{}}
+
+      iex> create_sale(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_sale(%{"sale_items" => sale_items} = attrs) do
+    Multi.new()
+    |> Multi.insert(:sale, prepare_sale_to_insert(sale_items, attrs))
+    |> update_products_inventories(attrs, -1)
+    |> Repo.transaction()
+  end
+
+  defp update_products_inventories(
+         multi,
+         %{"sale_items" => sale_items, "store_id" => store_id},
+         event
+       ) do
+    Enum.reduce(sale_items, multi, fn item, acc ->
+      product_id = Map.get(item, "product_id")
+      quantity = Map.get(item, "quantity")
+
+      {:ok, product} = get_product(store_id, product_id)
+
+      product_update_changeset =
+        Product.changeset(product, %{
+          available_quantity: product.available_quantity + quantity * event
+        })
+
+      acc
+      |> Multi.update(String.to_atom("update_product_#{product_id}"), product_update_changeset)
+    end)
+  end
+
+  defp prepare_sale_to_insert(sale_items, attrs) do
+    attrs =
+      attrs
+      |> Map.put("total_value", calculate_sale_total_value(sale_items))
+
+    Sale.changeset(%Sale{}, attrs)
+  end
+
+  defp calculate_sale_total_value([_ | _] = sale_items) do
+    sale_items
+    |> Enum.reduce(0, fn %{"quantity" => quantity, "unit_price" => unit_price}, acc ->
+      quantity * unit_price + acc
+    end)
+  end
+
+  defp calculate_sale_total_value([] = _sale_items) do
+    0.0
+  end
+
+  def validate_sale_products(%{"store_id" => store_id, "sale_items" => sale_items = [_ | _]}) do
+    product_ids =
+      sale_items
+      |> Enum.reduce([], fn %{"product_id" => product_id}, acc ->
+        acc ++ [product_id]
+      end)
+
+    find_products(store_id, product_ids)
+  end
+
+  def validate_sale_products(%{"store_id" => _, "sale_items" => _ = []}) do
+    []
+  end
+
+  def validate_products_inventory(products, sale_items) do
+    Enum.reduce(sale_items, [], fn item, errors ->
+      case Enum.find(products, fn product ->
+             product.id == Map.get(item, "product_id")
+           end) do
+        nil ->
+          errors ++ ["#{item.product_id} wasnt found in the given products list"]
+
+        product ->
+          case product.available_quantity >= Map.get(item, "quantity") do
+            true ->
+              errors
+
+            false ->
+              errors ++
+                ["Product with ID: #{product.id} has #{product.available_quantity} in inventory"]
+          end
+      end
+    end)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking sale changes.
+
+  ## Examples
+
+      iex> change_sale(sale)
+      %Ecto.Changeset{source: %Sale{}}
+
+  """
+  def change_sale(%Sale{} = sale) do
+    Sale.changeset(sale, %{})
+  end
+
+  alias StoreAdmin.Inventories.SaleItem
+
+  defp change_item_from_sale(multi, store_id, sale, sale_item_params, event) do
+    multi
+    |> Multi.update(
+      :sale_updated,
+      Sale.changeset(sale, %{
+        total_value:
+          sale.total_value +
+            Map.get(sale_item_params, "unit_price") * Map.get(sale_item_params, "quantity") *
+              event
+      })
+    )
+    |> update_products_inventories(
+      %{
+        "sale_items" => [sale_item_params],
+        "store_id" => store_id
+      },
+      event * -1
+    )
+  end
+
+  def add_item_to_sale(store_id, sale_id, sale_item_params) do
+    case get_sale(store_id, sale_id) do
+      {:ok, sale} ->
+        Multi.new()
+        |> Multi.insert(
+          :sale_item,
+          SaleItem.changeset(%SaleItem{}, sale_item_params |> Map.put("sale_id", sale_id))
+        )
+        |> change_item_from_sale(store_id, sale, sale_item_params, 1)
+        |> Repo.transaction()
+
+      error ->
+        error
+    end
+  end
+
+  def remove_item_from_sale(store_id, sale_id, sale_item_id) do
+    case get_sale(store_id, sale_id) do
+      {:ok, sale} ->
+        case get_sale_item(sale_id, sale_item_id) do
+          {:ok, sale_item} ->
+            sale_item_params = convert_to_map(sale_item)
+
+            Multi.new()
+            |> change_item_from_sale(store_id, sale, sale_item_params, -1)
+            |> Multi.delete(
+              :sale_item_deleted,
+              sale_item
+            )
+            |> Repo.transaction()
+
+          error ->
+            error
+        end
+
+      error ->
+        error
+    end
+  end
+
+  defp convert_to_map(param) do
+    param
+    |> Map.from_struct()
+    |> change_atom_map_to_string()
+  end
+
+  defp change_atom_map_to_string(atom_key_map) do
+    for {key, val} <- atom_key_map, into: %{}, do: {Atom.to_string(key), val}
+  end
+
+  def get_sale_item(sale_id, sale_item_id) do
+    case from(si in SaleItem, where: si.sale_id == ^sale_id)
+         |> Repo.get(sale_item_id) do
+      nil -> {:error, "SaleItem not found"}
+      %SaleItem{} = sale_item -> {:ok, sale_item}
+    end
   end
 end
