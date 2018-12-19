@@ -39,8 +39,9 @@ config :phoenix, :stacktrace_depth, 20
 # Configure your database
 config :store_admin, StoreAdmin.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "store_admin_dev",
-  hostname: "localhost",
+  username: System.get_env("PGUSER"),
+  password: System.get_env("PGPASSWORD"),
+  database: System.get_env("PGDATABASE"),
+  hostname: System.get_env("PGHOST"),
+  port: System.get_env("PGPORT"),
   pool_size: 10

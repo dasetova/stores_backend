@@ -1,15 +1,24 @@
 FROM elixir:latest
 
+RUN apt-get update && \
+  apt-get install -y postgresql-client
+
 RUN mkdir /app
-COPY . /app
+
 WORKDIR /app
 
-ENV PORT 8080
-ENV MIX_ENV dev
-
-RUN mix local.hex --force
-RUN mix do compile
-
+ENV MIX_ENV prod
 EXPOSE 4000
 
-CMD mix ecto.migrate; mix phx.server
+RUN mix local.hex --force
+RUN mix local.rebar --force 
+COPY mix.* ./
+
+RUN mix deps.get --only prod
+RUN mix deps.compile
+COPY . .
+
+RUN mix compile
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD mix phx.server
