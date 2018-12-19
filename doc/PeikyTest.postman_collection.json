@@ -1,0 +1,494 @@
+{
+	"info": {
+		"_postman_id": "47c50e78-5501-4584-af0d-e2e86deaed65",
+		"name": "PeikyTest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Store",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"store\":\n\t{\n\t\t\"name\": \"My Store\",\n\t\t\"address\": \"False street 123\",\n\t\t\"phone\": \"+5749234324\",\n\t\t\"logo\": \"http://logo.com\"\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"store\":\n\t{\n\t\t\"name\": \"My Store!\",\n\t\t\"address\": \"False street 123\",\n\t\t\"phone\": \"+57490345445\",\n\t\t\"logo\": \"http://logo.com\"\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"store\":\n\t{\n\t\t\"name\": \"My Store\",\n\t\t\"address\": \"False street 123\",\n\t\t\"phone\": \"+57490345445\",\n\t\t\"logo\": \"http://logo.com\"\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"store\":\n\t{\n\t\t\"name\": \"My Store\",\n\t\t\"address\": \"False street 123\",\n\t\t\"phone\": \"+57490345445\",\n\t\t\"logo\": \"http://logo.com\"\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/2",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"store\":\n\t{\n\t\t\"name\": \"My Store\",\n\t\t\"address\": \"False street 123\",\n\t\t\"phone\": \"+57490345445\",\n\t\t\"logo\": \"http://logo.com\"\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"name\": \"Product test\",\n\t\t\"description\": \"Some description\",\n\t\t\"available_quantity\": 10,\n\t\t\"unit_price\": 100.0\n\t}\n}"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1/products",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"name\": \"Product test2\",\n\t\t\"description\": \"Some description\",\n\t\t\"available_quantity\": 10,\n\t\t\"unit_price\": 100.0\n\t}\n}"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1/products/2",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1",
+								"products",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"name\": \"Product test\",\n\t\t\"description\": \"Some description\",\n\t\t\"available_quantity\": 10,\n\t\t\"unit_price\": 100.0\n\t}\n}"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1/products/",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1",
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"name\": \"Product test\",\n\t\t\"description\": \"Some description\",\n\t\t\"available_quantity\": 10,\n\t\t\"unit_price\": 100.0\n\t}\n}"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/10/products/2",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"10",
+								"products",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"product\": {\n\t\t\"name\": \"Product test\",\n\t\t\"description\": \"Some description\",\n\t\t\"available_quantity\": 10,\n\t\t\"unit_price\": 100.0\n\t}\n}"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1/products/2",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1",
+								"products",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sales",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"sale\": {\n\t\t\"customer_identification_number\": \"1012834293\",\n\t\t\"sale_items\": [\n\t\t\t{\n\t\t\t\t\"product_id\": 1,\n\t\t\t\t\"quantity\": 10,\n\t\t\t\t\"unit_price\": 10000.0\n\t\t\t}\n\t\t]\n\t}\n}"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1/sales",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1",
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddItem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"sale_item\":\n\t{\n\t\t\"product_id\": 1,\n\t\t\"quantity\": 10,\n\t\t\"unit_price\": 10000.0\n\t}\n}"
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1/sales/2/sale_items",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1",
+								"sales",
+								"2",
+								"sale_items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RemoveItem",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1/sales/2/sale_items/22",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1",
+								"sales",
+								"2",
+								"sale_items",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "http://0.0.0.0:4000/api/stores/1/sales",
+							"protocol": "http",
+							"host": [
+								"0",
+								"0",
+								"0",
+								"0"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"stores",
+								"1",
+								"sales"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
